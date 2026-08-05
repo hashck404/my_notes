@@ -2,14 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:either_dart/either.dart';
 import 'package:my_notes/core/error/failures.dart';
 import 'package:my_notes/core/utils/logger.dart';
+import 'package:my_notes/features/authentication/data/data_source/local_data_source.dart';
 import 'package:my_notes/features/authentication/data/model/user_model.dart';
-import 'package:my_notes/features/authentication/data/remote_data_source.dart';
+import 'package:my_notes/features/authentication/data/data_source/remote_data_source.dart';
 import 'package:my_notes/features/authentication/repository/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDatasource _remoteDatasource;
-
-  AuthRepositoryImpl(this._remoteDatasource);
+  final AuthLocalDataSource _localDataSource;
+  AuthRepositoryImpl(this._remoteDatasource, this._localDataSource);
 
   @override
   Future<Either<Failure, String>> createUserWithEmailAndPassword(
@@ -120,7 +121,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, String>> loginWithEmailAndPassword(
+  Future<Either<Failure, String>> signInWithEmailAndPassword(
     String email,
     String password,
   ) async {
@@ -176,5 +177,15 @@ class AuthRepositoryImpl implements AuthRepository {
         ),
       );
     }
+  }
+
+  @override
+  Future<String> getUsername() async {
+    return await _localDataSource.getUsername();
+  }
+
+  @override
+  Future<void> saveUsername(String username) async {
+    _localDataSource.saveUsername(username);
   }
 }

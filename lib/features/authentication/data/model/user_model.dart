@@ -1,13 +1,11 @@
-import 'package:flutter/foundation.dart';
-
 class UserModel {
   final String uid;
-  final String userName;
+  final String username;
   final String email;
   final String createdAt;
   UserModel({
     required this.uid,
-    required this.userName,
+    required this.username,
     required this.email,
     required this.createdAt,
   });
@@ -15,7 +13,7 @@ class UserModel {
   factory UserModel.fromFirestore(Map<String, dynamic> data) {
     return UserModel(
       uid: data['uid'],
-      userName: data['userName'],
+      username: data['username'],
       email: data['email'],
       createdAt: data['createdAt'],
     );
