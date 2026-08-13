@@ -5,9 +5,8 @@ import 'package:my_notes/features/authentication/provider/auth_provider.dart';
 
 class AuthController extends AsyncNotifier<void> {
   @override
-  FutureOr<void> build() {
-    // whatever you return here becomes `state`
-  }
+  FutureOr<void> build() {}
+
   Future<void> signUp(String email, String password, String name) async {
     state = AsyncLoading();
     final repo = ref.read(authRepositoryProvider);

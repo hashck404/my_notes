@@ -73,7 +73,11 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       next.whenOrNull(
         error: (error, _) {
           if (error is Failure) {
-            showSnackbar(context, error, const Icon(Icons.error_outline));
+            showSnackbar(
+              context,
+              error.message,
+              const Icon(Icons.error_outline),
+            );
           }
         },
         data: (_) {

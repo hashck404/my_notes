@@ -5,14 +5,24 @@ import 'package:my_notes/features/authentication/data/model/user_model.dart';
 import 'package:retry/retry.dart';
 
 class AuthRemoteDatasource {
+  final FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firebaseFirestore;
+  AuthRemoteDatasource({
+    required FirebaseAuth firebaseAuth,
+    required FirebaseFirestore firebaseFirestore,
+  }) : _firebaseAuth = firebaseAuth,
+       _firebaseFirestore = firebaseFirestore;
+
   Future<String> createUserWithEmailAndPassword(
     String email,
     String password,
     String username,
   ) async {
     //Creates a new user in firebase auth system
-    final userCredentials = await FirebaseAuth.instance
-        .createUserWithEmailAndPassword(email: email, password: password);
+    final userCredentials = await _firebaseAuth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
     final newUser = userCredentials.user;
 
@@ -44,10 +54,7 @@ class AuthRemoteDatasource {
   }
 
   Future<UserModel?> getUser(String uid) async {
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .get();
+    final doc = await _firebaseFirestore.collection('users').doc(uid).get();
 
     if (doc.exists) {
       final userModel = UserModel.fromFirestore(doc.data()!);
@@ -60,21 +67,22 @@ class AuthRemoteDatasource {
     String email,
     String password,
   ) async {
-    final userCredentials = await FirebaseAuth.instance
-        .signInWithEmailAndPassword(email: email, password: password);
+    final userCredentials = await _firebaseAuth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
     final User user = userCredentials.user!;
 
     return user.uid;
-    
   }
-}
 
-Future<void> _createUserDocument(String uid, email, username) async {
-  await FirebaseFirestore.instance.collection('users').doc(uid).set({
-    'uid': uid,
-    'email': email,
-    'username': username,
-    'createdAt': FieldValue.serverTimestamp(),
-  });
+  Future<void> _createUserDocument(String uid, email, username) async {
+    await _firebaseFirestore.collection('users').doc(uid).set({
+      'uid': uid,
+      'email': email,
+      'username': username,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
 }

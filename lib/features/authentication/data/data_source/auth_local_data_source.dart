@@ -1,16 +1,17 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthLocalDataSource {
-  final SharedPreferences sharedPreferences;
+  final SharedPreferences _sharedPreferences;
 
-  AuthLocalDataSource(this.sharedPreferences);
+  AuthLocalDataSource({required SharedPreferences sharedPreference})
+    : _sharedPreferences = sharedPreference;
 
   Future<void> saveUsername(String username) async {
-    await sharedPreferences.setString('username', username);
+    await _sharedPreferences.setString('username', username);
   }
 
   Future<String> getUsername() async {
-    final username = sharedPreferences.getString('username');
+    final username = _sharedPreferences.getString('username');
 
     if (username == null) {
       throw Exception('Username not found');

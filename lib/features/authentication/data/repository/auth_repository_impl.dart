@@ -2,9 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:either_dart/either.dart';
 import 'package:my_notes/core/error/failures.dart';
 import 'package:my_notes/core/utils/logger.dart';
-import 'package:my_notes/features/authentication/data/data_source/local_data_source.dart';
+import 'package:my_notes/features/authentication/data/data_source/auth_local_data_source.dart';
 import 'package:my_notes/features/authentication/data/model/user_model.dart';
-import 'package:my_notes/features/authentication/data/data_source/remote_data_source.dart';
+import 'package:my_notes/features/authentication/data/data_source/auth_remote_data_source.dart';
 import 'package:my_notes/features/authentication/repository/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -186,6 +186,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> saveUsername(String username) async {
-    _localDataSource.saveUsername(username);
+    await _localDataSource.saveUsername(username);
   }
 }

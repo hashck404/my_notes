@@ -1,13 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_notes/core/provider/firebase_providers.dart';
 import 'package:my_notes/features/authentication/data/controller/auth_controller.dart';
-import 'package:my_notes/features/authentication/data/data_source/local_data_source.dart';
-import 'package:my_notes/features/authentication/data/data_source/remote_data_source.dart';
+import 'package:my_notes/features/authentication/data/data_source/auth_local_data_source.dart';
+import 'package:my_notes/features/authentication/data/data_source/auth_remote_data_source.dart';
 import 'package:my_notes/features/authentication/data/repository/auth_repository_impl.dart';
 import 'package:my_notes/features/authentication/repository/auth_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDatasource>(
-  (ref) => AuthRemoteDatasource(),
+  (ref) => AuthRemoteDatasource(
+    firebaseAuth: ref.watch(firebaseAuthProvider),
+    firebaseFirestore: ref.watch(firestoreProvider),
+  ),
 );
 
 final authRepositoryProvider = Provider<AuthRepository>(
@@ -26,5 +30,7 @@ final sharedPreferencesProvider = Provider<SharedPreferences>(
 );
 
 final authLocalDataSource = Provider<AuthLocalDataSource>(
-  (ref) => AuthLocalDataSource(ref.watch(sharedPreferencesProvider)),
+  (ref) => AuthLocalDataSource(
+    sharedPreference: ref.watch(sharedPreferencesProvider),
+  ),
 );
