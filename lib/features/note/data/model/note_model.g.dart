@@ -19,13 +19,13 @@ class NoteModelAdapter extends TypeAdapter<NoteModel> {
     return NoteModel(
       ownerId: fields[0] as String?,
       id: fields[1] as String,
-      title: fields[2] as String?,
-      content: fields[3] as String?,
-      createdAt: fields[4] as DateTime,
-      updatedAt: fields[5] as DateTime,
-      isPinned: fields[6] as bool,
-      isSync: fields[7] as bool,
-      pendingDelete: fields[8] as bool,
+      content: fields[2] as String?,
+      remoteCreatedAt: fields[3] as DateTime?,
+      remoteUpdatedAt: fields[4] as DateTime?,
+      isPinned: fields[5] as bool,
+      isSync: fields[6] as bool,
+      pendingDelete: fields[7] as bool,
+      localUpdatedAt: fields[8] as DateTime,
     );
   }
 
@@ -38,19 +38,19 @@ class NoteModelAdapter extends TypeAdapter<NoteModel> {
       ..writeByte(1)
       ..write(obj.id)
       ..writeByte(2)
-      ..write(obj.title)
-      ..writeByte(3)
       ..write(obj.content)
+      ..writeByte(3)
+      ..write(obj.remoteCreatedAt)
       ..writeByte(4)
-      ..write(obj.createdAt)
+      ..write(obj.remoteUpdatedAt)
       ..writeByte(5)
-      ..write(obj.updatedAt)
-      ..writeByte(6)
       ..write(obj.isPinned)
-      ..writeByte(7)
+      ..writeByte(6)
       ..write(obj.isSync)
+      ..writeByte(7)
+      ..write(obj.pendingDelete)
       ..writeByte(8)
-      ..write(obj.pendingDelete);
+      ..write(obj.localUpdatedAt);
   }
 
   @override

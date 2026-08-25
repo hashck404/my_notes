@@ -1,9 +1,17 @@
 import 'package:hive_ce_flutter/hive_flutter.dart';
-import 'package:my_notes/features/home/data/model/note_model.dart';
+import 'package:my_notes/features/note/data/model/note_change_model.dart';
+import 'package:my_notes/features/note/data/model/note_model.dart';
 
-class HomeLocalDataSource {
+class NoteLocalDataSource {
   final Box<NoteModel> _noteBox;
-  HomeLocalDataSource({required Box<NoteModel> noteBox}) : _noteBox = noteBox;
+  NoteLocalDataSource({required Box<NoteModel> noteBox}) : _noteBox = noteBox;
+
+  Stream<List<NoteModel>> watchNotes() async* {
+    yield getAllVisibleNotes();
+    await for (final _ in _noteBox.watch()) {
+      yield getAllUnsyncedNotes();
+    }
+  }
 
   Future<void> saveNote(NoteModel note) async {
     await _noteBox.put(note.id, note);

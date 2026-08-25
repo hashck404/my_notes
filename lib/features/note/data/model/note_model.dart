@@ -9,30 +9,30 @@ class NoteModel {
   @HiveField(1)
   final String id;
   @HiveField(2)
-  final String? title;
-  @HiveField(3)
   final String? content;
+  @HiveField(3)
+  final DateTime? remoteCreatedAt;
   @HiveField(4)
-  final DateTime createdAt;
+  final DateTime? remoteUpdatedAt;
   @HiveField(5)
-  final DateTime updatedAt;
-  @HiveField(6)
   final bool isPinned;
-  @HiveField(7)
+  @HiveField(6)
   final bool isSync;
-  @HiveField(8)
+  @HiveField(7)
   final bool pendingDelete;
+  @HiveField(8)
+  final DateTime localUpdatedAt;
 
   NoteModel({
     required this.ownerId,
     required this.id,
-    required this.title,
     required this.content,
-    required this.createdAt,
-    required this.updatedAt,
+    required this.remoteCreatedAt,
+    required this.remoteUpdatedAt,
     required this.isPinned,
     required this.isSync,
     required this.pendingDelete,
+    required this.localUpdatedAt,
   });
 
   NoteModel copyWith({
@@ -40,47 +40,53 @@ class NoteModel {
     String? id,
     String? title,
     String? content,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    DateTime? remoteCreatedAt,
+    DateTime? remoteUpdatedAt,
     bool? isPinned,
     bool? isSync,
     bool? pendingDelete,
+    DateTime? localUpdatedAt,
   }) {
     return NoteModel(
       ownerId: ownerId ?? this.ownerId,
       id: id ?? this.id,
-      title: title ?? this.title,
       content: content ?? this.content,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      remoteCreatedAt: remoteCreatedAt ?? this.remoteCreatedAt,
+      remoteUpdatedAt: remoteUpdatedAt ?? this.remoteUpdatedAt,
       isPinned: isPinned ?? this.isPinned,
       isSync: isSync ?? this.isSync,
       pendingDelete: pendingDelete ?? this.pendingDelete,
+      localUpdatedAt: localUpdatedAt ?? this.localUpdatedAt,
     );
   }
 
   Map<String, dynamic> toFirestore() {
-    return {
+    final data = <String, dynamic>{
       'ownerId': ownerId,
-      'title': title,
       'content': content,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
       'isPinned': isPinned,
+      'remoteUpdatedAt': FieldValue.serverTimestamp(),
     };
+
+    if (remoteCreatedAt == null) {
+      data['remoteCreatedAt'] = FieldValue.serverTimestamp();
+    }
+
+    return data;
   }
 
   factory NoteModel.fromFirestore(String id, Map<String, dynamic> data) {
+    final remoteUpdatedAt = (data['remoteUpdatedAt'] as Timestamp?)?.toDate();
     return NoteModel(
       ownerId: data['ownerId'] as String?,
       id: id,
-      title: data['title'] as String?,
       content: data['content'] as String?,
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      remoteCreatedAt: (data['remoteCreatedAt'] as Timestamp?)?.toDate(),
+      remoteUpdatedAt: remoteUpdatedAt,
       isPinned: data['isPinned'] as bool? ?? false,
       isSync: true,
       pendingDelete: false,
+      localUpdatedAt: remoteUpdatedAt ?? DateTime.now().toUtc(),
     );
   }
 }

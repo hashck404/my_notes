@@ -1,14 +1,15 @@
 import 'package:either_dart/either.dart';
 import 'package:my_notes/core/error/failures.dart';
-import 'package:my_notes/features/home/data/model/note_change_model.dart';
-import 'package:my_notes/features/home/data/model/note_model.dart';
+import 'package:my_notes/features/note/data/model/note_change_model.dart';
+import 'package:my_notes/features/note/data/model/note_model.dart';
 
-abstract class HomeRepository {
-  Future<Either<Failure, void>> createNote(String? title, String? content);
+abstract class NoteRepository {
+  Stream<List<NoteModel>> watchNotes();
+
+  Future<Either<Failure, void>> createNote(String? content, bool? isPinned);
 
   Future<Either<Failure, void>> updateNote(
     String id,
-    String? title,
     String? content,
     bool? isPinned,
     bool? pendingDelete,

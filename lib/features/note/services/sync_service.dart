@@ -3,18 +3,18 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:my_notes/core/utils/logger.dart';
 import 'package:my_notes/core/utils/show_toast_bar.dart';
-import 'package:my_notes/features/home/data/model/note_change_model.dart';
-import 'package:my_notes/features/home/repository/home_repository.dart';
+import 'package:my_notes/features/note/data/model/note_change_model.dart';
+import 'package:my_notes/features/note/repository/note_repository.dart';
 
 class NoteSyncServices {
-  final HomeRepository _homeRepository;
+  final NoteRepository _noteRepository;
   final FirebaseAuth _firebaseAuth;
   StreamSubscription<List<NoteChange>>? _subscription;
 
   NoteSyncServices({
     required FirebaseAuth firebaseAuth,
-    required HomeRepository homeRepository,
-  }) : _homeRepository = homeRepository,
+    required NoteRepository noteRepository,
+  }) : _noteRepository = noteRepository,
        _firebaseAuth = firebaseAuth;
 
   Future<void> startLiveSync() async {
@@ -23,7 +23,7 @@ class NoteSyncServices {
 
     _subscription?.cancel();
 
-    _subscription = _homeRepository
+    _subscription = _noteRepository
         .watchNoteChanges(ownerId)
         .listen(
           (changes) async {
@@ -31,9 +31,10 @@ class NoteSyncServices {
               switch (change.type) {
                 case NoteChangeType.added:
                 case NoteChangeType.modified:
-                  await _homeRepository.applyRemoteNote(change.note!);
+                  await _noteRepository.applyRemoteNote(change.note!);
+                  break;
                 case NoteChangeType.removed:
-                  await _homeRepository.applyRemoteNoteDelete(change.id);
+                  await _noteRepository.applyRemoteNoteDelete(change.id);
               }
             }
           },
@@ -59,11 +60,11 @@ class NoteSyncServices {
   }
 
   Future<void> completePendingDelete() async {
-    final pendingDeleteNotes = _homeRepository.getPendingDeleteNotes();
+    final pendingDeleteNotes = _noteRepository.getPendingDeleteNotes();
     var failureCount = 0;
 
     for (final pendingDeleteNote in pendingDeleteNotes) {
-      final result = await _homeRepository.deleteNote(pendingDeleteNote.id);
+      final result = await _noteRepository.deleteNote(pendingDeleteNote.id);
 
       result.fold((failure) {
         failureCount++;
@@ -81,11 +82,11 @@ class NoteSyncServices {
   }
 
   Future<void> pushUnsyncedNotes() async {
-    final unsyncedNotes = _homeRepository.getUnsyncedNotes();
+    final unsyncedNotes = _noteRepository.getUnsyncedNotes();
     var failureCount = 0;
 
     for (final unsyncedNote in unsyncedNotes) {
-      final result = await _homeRepository.pushUnsyncedNote(unsyncedNote.id);
+      final result = await _noteRepository.pushUnsyncedNote(unsyncedNote.id);
       result.fold((failure) {
         failureCount++;
         logger.e(failure.message);
@@ -105,11 +106,11 @@ class NoteSyncServices {
     final userId = _firebaseAuth.currentUser?.uid;
     if (userId == null) return;
 
-    final unownedNotes = _homeRepository.getUnownedNotes();
+    final unownedNotes = _noteRepository.getUnownedNotes();
     var failureCount = 0;
 
     for (final unownedNote in unownedNotes) {
-      final result = await _homeRepository.claimUnownedNote(
+      final result = await _noteRepository.claimUnownedNote(
         userId,
         unownedNote.id,
       );

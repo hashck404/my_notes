@@ -3,33 +3,38 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:my_notes/core/error/failures.dart';
 import 'package:my_notes/core/network/connection_checker.dart';
 import 'package:my_notes/core/utils/logger.dart';
-import 'package:my_notes/features/home/data/data_source/home_local_data_source.dart';
-import 'package:my_notes/features/home/data/data_source/home_remote_data_source.dart';
-import 'package:my_notes/features/home/data/model/note_change_model.dart';
-import 'package:my_notes/features/home/data/model/note_model.dart';
-import 'package:my_notes/features/home/repository/home_repository.dart';
+import 'package:my_notes/features/note/data/data_source/note_local_data_source.dart';
+import 'package:my_notes/features/note/data/data_source/note_remote_data_source.dart';
+import 'package:my_notes/features/note/data/model/note_change_model.dart';
+import 'package:my_notes/features/note/data/model/note_model.dart';
+import 'package:my_notes/features/note/repository/note_repository.dart';
 import 'package:uuid/uuid.dart';
 
-class HomeRepositoryImpl implements HomeRepository {
+class NoteRepositoryImpl implements NoteRepository {
   final FirebaseAuth _firebaseAuth;
-  final HomeLocalDataSource _homeLocalDataSource;
-  final HomeRemoteDataSource _homeRemoteDataSource;
+  final NoteLocalDataSource _noteLocalDataSource;
+  final NoteRemoteDataSource _noteRemoteDataSource;
   final ConnectionChecker _connectionChecker;
 
-  HomeRepositoryImpl({
+  NoteRepositoryImpl({
     required FirebaseAuth firebaseAuth,
-    required HomeLocalDataSource homeLocalDataSource,
-    required HomeRemoteDataSource homeRemoteDataSource,
+    required NoteLocalDataSource noteLocalDataSource,
+    required NoteRemoteDataSource noteRemoteDataSource,
     required ConnectionChecker connectionChecker,
   }) : _firebaseAuth = firebaseAuth,
-       _homeLocalDataSource = homeLocalDataSource,
-       _homeRemoteDataSource = homeRemoteDataSource,
+       _noteLocalDataSource = noteLocalDataSource,
+       _noteRemoteDataSource = noteRemoteDataSource,
        _connectionChecker = connectionChecker;
 
   @override
+  Stream<List<NoteModel>> watchNotes() {
+    return _noteLocalDataSource.watchNotes();
+  }
+
+  @override
   Future<Either<Failure, void>> createNote(
-    String? title,
     String? content,
+    bool? isPinned,
   ) async {
     try {
       final userId = _firebaseAuth.currentUser?.uid;
@@ -37,20 +42,20 @@ class HomeRepositoryImpl implements HomeRepository {
       final model = NoteModel(
         ownerId: userId,
         id: const Uuid().v4(),
-        title: title,
         content: content,
-        createdAt: DateTime.now().toUtc(),
-        updatedAt: DateTime.now().toUtc(),
-        isPinned: false,
+        remoteCreatedAt: null,
+        remoteUpdatedAt: null,
+        localUpdatedAt: DateTime.now().toUtc(),
+        isPinned: isPinned ?? false,
         isSync: false,
         pendingDelete: false,
       );
 
       if (await _connectionChecker.isConnected && userId != null) {
-        await _homeRemoteDataSource.upsertNote(model);
-        await _homeLocalDataSource.saveNote(model.copyWith(isSync: true));
+        await _noteRemoteDataSource.upsertNote(model);
+        await _noteLocalDataSource.saveNote(model.copyWith(isSync: true));
       } else {
-        await _homeLocalDataSource.saveNote(model);
+        await _noteLocalDataSource.saveNote(model);
       }
       return const Right(null);
     } on FirebaseException catch (e) {
@@ -70,13 +75,12 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<Either<Failure, void>> updateNote(
     String id,
-    String? title,
     String? content,
     bool? isPinned,
     bool? pendingDelete,
   ) async {
     try {
-      final model = _homeLocalDataSource.getNote(id);
+      final model = _noteLocalDataSource.getNote(id);
       if (model == null) {
         return Left(
           Failure(
@@ -93,16 +97,15 @@ class HomeRepositoryImpl implements HomeRepository {
         ownerId: model.ownerId ?? userId,
         isPinned: isPinned,
         pendingDelete: pendingDelete,
-        title: title,
         content: content,
         isSync: false,
       );
 
       if (await _connectionChecker.isConnected && userId != null) {
-        await _homeRemoteDataSource.upsertNote(updateModel);
-        await _homeLocalDataSource.saveNote(updateModel.copyWith(isSync: true));
+        await _noteRemoteDataSource.upsertNote(updateModel);
+        await _noteLocalDataSource.saveNote(updateModel.copyWith(isSync: true));
       } else {
-        await _homeLocalDataSource.saveNote(updateModel);
+        await _noteLocalDataSource.saveNote(updateModel);
       }
 
       return const Right(null);
@@ -122,20 +125,31 @@ class HomeRepositoryImpl implements HomeRepository {
 
   @override
   Stream<List<NoteChange>> watchNoteChanges(String ownerId) {
-    return _homeRemoteDataSource.watchNoteChanges(ownerId);
+    return _noteRemoteDataSource.watchNoteChanges(ownerId);
   }
 
   @override
   Future<void> applyRemoteNote(NoteModel note) async {
-    final local = _homeLocalDataSource.getNote(note.id);
-    if (local == null || note.updatedAt.isAfter(local.updatedAt)) {
-      await _homeLocalDataSource.saveNote(note);
+    final local = _noteLocalDataSource.getNote(note.id);
+
+    if (local == null) {
+      await _noteLocalDataSource.saveNote(note);
+      return;
+    }
+
+    final incoming = note.remoteUpdatedAt;
+    final existing = local.remoteUpdatedAt;
+
+    if (incoming == null) return;
+
+    if (existing == null || incoming.isAfter(existing)) {
+      await _noteLocalDataSource.saveNote(note);
     }
   }
 
   @override
   Future<void> applyRemoteNoteDelete(String id) async {
-    await _homeLocalDataSource.removeNote(id);
+    await _noteLocalDataSource.removeNote(id);
   }
 
   @override
@@ -144,7 +158,7 @@ class HomeRepositoryImpl implements HomeRepository {
     String noteId,
   ) async {
     try {
-      final note = _homeLocalDataSource.getNote(noteId);
+      final note = _noteLocalDataSource.getNote(noteId);
       if (note == null) {
         return Left(
           Failure(
@@ -156,7 +170,7 @@ class HomeRepositoryImpl implements HomeRepository {
       }
 
       final claimed = note.copyWith(ownerId: ownerId, isSync: false);
-      await _homeLocalDataSource.saveNote(claimed);
+      await _noteLocalDataSource.saveNote(claimed);
 
       return const Right(null);
     } catch (e, s) {
@@ -174,7 +188,7 @@ class HomeRepositoryImpl implements HomeRepository {
   @override
   Future<Either<Failure, void>> pushUnsyncedNote(String id) async {
     try {
-      final localModel = _homeLocalDataSource.getNote(id);
+      final localModel = _noteLocalDataSource.getNote(id);
       if (localModel == null) {
         return Left(
           Failure(
@@ -184,8 +198,8 @@ class HomeRepositoryImpl implements HomeRepository {
         );
       }
 
-      await _homeRemoteDataSource.upsertNote(localModel);
-      await _homeLocalDataSource.saveNote(localModel.copyWith(isSync: true));
+      await _noteRemoteDataSource.upsertNote(localModel);
+      await _noteLocalDataSource.saveNote(localModel.copyWith(isSync: true));
 
       return const Right(null);
     } on FirebaseException catch (e) {
@@ -204,23 +218,23 @@ class HomeRepositoryImpl implements HomeRepository {
 
   @override
   List<NoteModel> getPendingDeleteNotes() {
-    return _homeLocalDataSource.getPendingDeleteNotes();
+    return _noteLocalDataSource.getPendingDeleteNotes();
   }
 
   @override
   List<NoteModel> getUnownedNotes() {
-    return _homeLocalDataSource.getUnownedNotes();
+    return _noteLocalDataSource.getUnownedNotes();
   }
 
   @override
   List<NoteModel> getUnsyncedNotes() {
-    return _homeLocalDataSource.getAllUnsyncedNotes();
+    return _noteLocalDataSource.getAllUnsyncedNotes();
   }
 
   @override
   Future<Either<Failure, void>> deleteNote(String noteId) async {
     try {
-      final model = _homeLocalDataSource.getNote(noteId);
+      final model = _noteLocalDataSource.getNote(noteId);
       if (model == null) {
         return Left(
           Failure(
@@ -231,19 +245,19 @@ class HomeRepositoryImpl implements HomeRepository {
         );
       }
       if (!model.isSync) {
-        await _homeLocalDataSource.removeNote(noteId);
+        await _noteLocalDataSource.removeNote(noteId);
         return const Right(null);
       }
 
       final userId = _firebaseAuth.currentUser?.uid;
 
       if (await _connectionChecker.isConnected && userId != null) {
-        await _homeRemoteDataSource.deleteNote(noteId);
-        await _homeLocalDataSource.removeNote(noteId);
+        await _noteRemoteDataSource.deleteNote(noteId);
+        await _noteLocalDataSource.removeNote(noteId);
 
         return const Right(null);
       } else {
-        await _homeLocalDataSource.saveNote(
+        await _noteLocalDataSource.saveNote(
           model.copyWith(pendingDelete: true),
         );
 

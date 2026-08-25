@@ -1,4 +1,4 @@
-import 'package:my_notes/features/home/data/model/note_model.dart';
+import 'package:my_notes/features/note/data/model/note_model.dart';
 
 enum NoteChangeType { added, modified, removed }
 

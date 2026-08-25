@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_notes/core/error/failures.dart';
 import 'package:my_notes/core/utils/show_snackbar.dart';
 import 'package:my_notes/features/authentication/provider/auth_provider.dart';
+import 'package:my_notes/features/authentication/view/screens/sign_up_page.dart';
 import 'package:my_notes/features/authentication/view/widgets/auth_field.dart';
 import 'package:my_notes/features/authentication/view/widgets/loading_animation.dart';
-import 'package:my_notes/features/home/view/home_page.dart';
+import 'package:my_notes/features/note/view/pages/note_page.dart';
 
 class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({super.key});
@@ -68,64 +70,104 @@ class _SignInPageState extends ConsumerState<SignInPage> {
 
         data: (data) => Navigator.of(
           context,
-        ).pushReplacement(MaterialPageRoute(builder: (ctx) => HomePage())),
+        ).pushReplacement(MaterialPageRoute(builder: (ctx) => NotePage())),
       );
     });
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: Text(
+          'my notes',
+          style: TextStyle(
+            fontFamily: 'junicode',
+            fontStyle: FontStyle.italic,
+            color: Colors.white,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(15.0),
           child: Stack(
             children: [
-              SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      Text(
-                        'Sign in.',
-                        style: TextStyle(
-                          fontSize: 50,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      AuthField(
-                        controller: _emailController,
-                        hint: 'Email',
-                        validate: _validateEmail,
-                      ),
-                      SizedBox(height: 10),
-                      AuthField(
-                        controller: _passwordController,
-                        hint: 'Password',
-                        validate: _validatePassword,
-                      ),
-                      SizedBox(height: 10),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            ref
-                                .read(authControllerProvider.notifier)
-                                .signIn(
-                                  _emailController.text.trim(),
-                                  _passwordController.text.trim(),
-                                );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 70),
-                          textStyle: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.grey.shade800),
-                            borderRadius: BorderRadius.circular(50),
+              Align(
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        Text(
+                          'Sign in.',
+                          style: TextStyle(
+                            fontFamily: 'junicode',
+                            fontSize: 60,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
                           ),
                         ),
-                        child: Text('Sign in'),
-                      ),
-                    ],
+                        SizedBox(height: 10),
+                        AuthField(
+                          controller: _emailController,
+                          hint: 'Email',
+                          validate: _validateEmail,
+                        ),
+                        SizedBox(height: 10),
+                        AuthField(
+                          controller: _passwordController,
+                          hint: 'Password',
+                          validate: _validatePassword,
+                          isPassword: true,
+                        ),
+                        SizedBox(height: 60),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              ref
+                                  .read(authControllerProvider.notifier)
+                                  .signIn(
+                                    _emailController.text.trim(),
+                                    _passwordController.text.trim(),
+                                  );
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 70),
+                            textStyle: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(color: Colors.grey.shade800),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                          ),
+                          child: Text('Sign in'),
+                        ),
+                        SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (ctx) => SignUpPage()),
+                            );
+                          },
+
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            minimumSize: Size(double.infinity, 70),
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(color: Colors.grey.shade800),
+                              borderRadius: BorderRadiusGeometry.all(
+                                Radius.circular(50),
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'sign up',
+                            style: TextStyle(color: Colors.white, fontSize: 28),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -142,4 +184,9 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       ),
     );
   }
+}
+
+@Preview(name: 'Sign In Page')
+Widget signInPagePreview() {
+  return SignInPage();
 }

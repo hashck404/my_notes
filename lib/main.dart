@@ -5,6 +5,10 @@ import 'package:my_notes/app_theme/dark_theme.dart';
 import 'package:my_notes/core/dependency_initialization.dart';
 import 'package:my_notes/features/authentication/view/screens/sign_in_page.dart';
 import 'package:my_notes/features/authentication/view/screens/sign_up_page.dart';
+import 'package:my_notes/features/note/view/pages/note_editing_page.dart';
+import 'package:my_notes/features/note/view/pages/note_page.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +23,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        FlutterQuillLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en')],
       title: 'Flutter Demo',
       theme: DarkTheme.darkTheme,
       home: StreamBuilder(
@@ -27,7 +39,7 @@ class MyApp extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CircularProgressIndicator();
           }
-          return SignInPage();
+          return NotePage();
         },
       ),
     );

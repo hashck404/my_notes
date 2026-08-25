@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:my_notes/features/home/data/model/note_change_model.dart';
-import 'package:my_notes/features/home/data/model/note_model.dart';
+import 'package:my_notes/features/note/data/model/note_change_model.dart';
+import 'package:my_notes/features/note/data/model/note_model.dart';
 
-class HomeRemoteDataSource {
+class NoteRemoteDataSource {
   final FirebaseFirestore _firebaseFirestore;
 
-  HomeRemoteDataSource({required FirebaseFirestore firebaseFirestore})
+  NoteRemoteDataSource({required FirebaseFirestore firebaseFirestore})
     : _firebaseFirestore = firebaseFirestore;
 
   Future<void> upsertNote(NoteModel note) async {
@@ -28,7 +28,7 @@ class HomeRemoteDataSource {
 
   Future<NoteModel?> getNote(String id) async {
     final doc = await _firebaseFirestore.collection('notes').doc(id).get();
-    if (doc.exists) {
+    if (!doc.exists) {
       return null;
     }
 
