@@ -5,7 +5,7 @@ class DarkTheme {
   static final darkTheme = ThemeData.dark().copyWith(
     colorScheme: ColorScheme.fromSeed(
       seedColor: Color.fromARGB(255, 247, 110, 83),
-      surface: Color.fromARGB(255, 23, 23, 23),
+      surface: Color.fromARGB(255, 50, 50, 50),
     ),
 
     primaryColor: Color.fromARGB(255, 247, 110, 83),

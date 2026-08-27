@@ -27,8 +27,19 @@ class NoteRepositoryImpl implements NoteRepository {
        _connectionChecker = connectionChecker;
 
   @override
-  Stream<List<NoteModel>> watchNotes() {
-    return _noteLocalDataSource.watchNotes();
+  Stream<List<NoteModel>> watchNotes() async* {
+    final stream = _noteLocalDataSource.watchNotes();
+    await for (final data in stream) {
+      final sortedList = List<NoteModel>.from(data)
+        ..sort((a, b) {
+          if (a.isPinned != b.isPinned) {
+            return a.isPinned ? -1 : 1;
+          }
+          return b.localUpdatedAt.compareTo(a.localUpdatedAt);
+        });
+
+      yield sortedList;
+    }
   }
 
   @override
@@ -246,6 +257,7 @@ class NoteRepositoryImpl implements NoteRepository {
       }
       if (!model.isSync) {
         await _noteLocalDataSource.removeNote(noteId);
+
         return const Right(null);
       }
 
@@ -254,7 +266,7 @@ class NoteRepositoryImpl implements NoteRepository {
       if (await _connectionChecker.isConnected && userId != null) {
         await _noteRemoteDataSource.deleteNote(noteId);
         await _noteLocalDataSource.removeNote(noteId);
-
+        logger.i('note deleted');
         return const Right(null);
       } else {
         await _noteLocalDataSource.saveNote(

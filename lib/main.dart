@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_notes/app_theme/dark_theme.dart';
+import 'package:my_notes/app_theme/light_theme.dart';
+import 'package:my_notes/app_theme/theme_provider.dart';
 import 'package:my_notes/core/dependency_initialization.dart';
 import 'package:my_notes/features/authentication/view/screens/sign_in_page.dart';
 import 'package:my_notes/features/authentication/view/screens/sign_up_page.dart';
@@ -16,12 +18,12 @@ void main() async {
   runApp(ProviderScope(overrides: overrides, child: const MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
@@ -32,14 +34,17 @@ class MyApp extends StatelessWidget {
       ],
       supportedLocales: const [Locale('en')],
       title: 'Flutter Demo',
-      theme: DarkTheme.darkTheme,
+      theme: LightTheme.lightTheme,
+      darkTheme: DarkTheme.darkTheme,
+      themeMode: themeMode,
+
       home: StreamBuilder(
         stream: FirebaseAuth.instance.idTokenChanges(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CircularProgressIndicator();
           }
-          return NotePage();
+          return SignInPage();
         },
       ),
     );

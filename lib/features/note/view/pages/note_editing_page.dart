@@ -158,7 +158,7 @@ class _NoteEditingPageState extends ConsumerState<NoteEditingPage> {
               ],
             ),
           ),
-          floatingActionButton: FloatingActionButton(
+          floatingActionButton: FloatingActionButton.large(
             child: Icon(Icons.done),
             onPressed: () => _saveNote(pendingDelete: false),
           ),

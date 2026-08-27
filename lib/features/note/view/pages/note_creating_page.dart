@@ -53,14 +53,17 @@ class _NoteCreatingPageState extends ConsumerState<NoteCreatingPage> {
           ),
         ),
         floatingActionButton: Consumer(
-          builder: (context, ref, child) => FloatingActionButton(
+          builder: (context, ref, child) => FloatingActionButton.large(
             child: Icon(Icons.done),
             onPressed: () {
-              final document = _quillController.document.toDelta();
-              final json = jsonEncode(document);
-              ref
-                  .read(noteControllerProvider.notifier)
-                  .createNote(content: json, isPinned: _isPinned);
+              if (!_quillController.document.isEmpty()) {
+                final document = _quillController.document.toDelta();
+
+                final json = jsonEncode(document);
+                ref
+                    .read(noteControllerProvider.notifier)
+                    .createNote(content: json, isPinned: _isPinned);
+              }
 
               Navigator.pop(context);
             },

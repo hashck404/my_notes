@@ -9,7 +9,7 @@ class NoteLocalDataSource {
   Stream<List<NoteModel>> watchNotes() async* {
     yield getAllVisibleNotes();
     await for (final _ in _noteBox.watch()) {
-      yield getAllUnsyncedNotes();
+      yield getAllVisibleNotes();
     }
   }
 

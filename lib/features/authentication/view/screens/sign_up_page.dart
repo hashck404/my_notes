@@ -93,11 +93,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       appBar: AppBar(
         title: Text(
           'my notes',
-          style: TextStyle(
-            fontFamily: 'junicode',
-            fontStyle: FontStyle.italic,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontFamily: 'junicode', fontStyle: FontStyle.italic),
         ),
         backgroundColor: Colors.transparent,
       ),
@@ -120,7 +116,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                           fontFamily: 'junicode',
                           fontSize: 60,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
                         ),
                       ),
 

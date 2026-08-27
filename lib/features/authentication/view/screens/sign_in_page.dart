@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widget_previews.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_notes/core/error/failures.dart';
 import 'package:my_notes/core/utils/show_snackbar.dart';
@@ -78,11 +77,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
         backgroundColor: Colors.transparent,
         title: Text(
           'my notes',
-          style: TextStyle(
-            fontFamily: 'junicode',
-            fontStyle: FontStyle.italic,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontFamily: 'junicode', fontStyle: FontStyle.italic),
         ),
       ),
       body: SafeArea(
@@ -102,7 +97,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                             fontFamily: 'junicode',
                             fontSize: 60,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
                           ),
                         ),
                         SizedBox(height: 10),
@@ -184,9 +178,4 @@ class _SignInPageState extends ConsumerState<SignInPage> {
       ),
     );
   }
-}
-
-@Preview(name: 'Sign In Page')
-Widget signInPagePreview() {
-  return SignInPage();
 }

@@ -1,26 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widget_previews.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
-class NoteTile extends StatefulWidget {
+class NoteTile extends ConsumerStatefulWidget {
   final Document content;
   final DateTime? dateTime;
   final VoidCallback? onTap;
   final bool isPinned;
+  final VoidCallback onSelectionToggle;
+  final bool isSelecting;
+  final bool isSelected;
+
   const NoteTile({
     super.key,
     required this.content,
     this.dateTime,
     required this.onTap,
     required this.isPinned,
+    required this.onSelectionToggle,
+    this.isSelecting = false,
+    this.isSelected = false,
   });
 
   @override
-  State<NoteTile> createState() => _NoteTileState();
+  ConsumerState<NoteTile> createState() => _NoteTileState();
 }
 
-class _NoteTileState extends State<NoteTile> {
+class _NoteTileState extends ConsumerState<NoteTile> {
   late final QuillController _controller;
   final GlobalKey _measureKey = GlobalKey();
   bool _isOverFlowing = false;
@@ -61,9 +68,17 @@ class _NoteTileState extends State<NoteTile> {
   @override
   Widget build(BuildContext context) {
     final bool clip = _measured && _isOverFlowing;
-
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: () {
+        if (widget.isSelecting) {
+          widget.onSelectionToggle();
+        } else {
+          widget.onTap?.call();
+        }
+      },
+      onLongPress: () {
+        widget.onSelectionToggle();
+      },
       child: Stack(
         children: [
           Container(
@@ -71,16 +86,28 @@ class _NoteTileState extends State<NoteTile> {
             constraints: BoxConstraints(maxHeight: maxHeight.toDouble()),
             clipBehavior: clip ? Clip.hardEdge : Clip.none,
             decoration: BoxDecoration(
-              color: Colors.grey.shade900,
-              boxShadow: const [BoxShadow(spreadRadius: 0, blurRadius: 5)],
-              border: Border.all(color: Colors.grey.shade800, width: 1),
+              color: Theme.of(context).colorScheme.surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.shadow.withValues(alpha: 0.3),
+                  spreadRadius: 0,
+                  blurRadius: 5,
+                ),
+              ],
+              border: Border.all(
+                color: Theme.of(
+                  context,
+                ).colorScheme.shadow.withValues(alpha: 0.3),
+                width: 1,
+              ),
               borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
             child: Padding(
               padding: const EdgeInsets.all(5.0),
               child: Column(
-                mainAxisSize:
-                    MainAxisSize.min, // size to content for the masonry layout
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (widget.dateTime != null)
@@ -96,9 +123,7 @@ class _NoteTileState extends State<NoteTile> {
                             ),
                           ),
                         ),
-                        widget.isPinned
-                            ? Icon(Icons.push_pin, size: 15)
-                            : SizedBox(),
+                        if (widget.isPinned) Icon(Icons.push_pin, size: 15),
                       ],
                     ),
 
@@ -124,10 +149,21 @@ class _NoteTileState extends State<NoteTile> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.grey.shade900.withAlpha(0),
-                      Colors.grey.shade900,
+                      Theme.of(context).colorScheme.surface.withAlpha(0),
+                      Theme.of(context).colorScheme.surface,
                     ],
                   ),
+                ),
+              ),
+            ),
+
+          if (widget.isSelected)
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color.fromRGBO(244, 114, 1, 0.25),
+                  border: Border.all(color: Colors.orange, width: 2),
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                 ),
               ),
             ),
@@ -136,16 +172,3 @@ class _NoteTileState extends State<NoteTile> {
     );
   }
 }
-
-// @Preview(name: 'Note Tile')
-// Widget noteTilePreview() {
-//   final document = Document()
-//     ..insert(0, 'This is some example text for my note.');
-
-//   return NoteTile(
-//     content: document,
-//     dateTime: DateTime.now(),
-//     onTap: () {},
-//     isPinned: false,
-//   );
-// }
