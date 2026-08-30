@@ -23,4 +23,5 @@ abstract class NoteRepository {
   List<NoteModel> getUnsyncedNotes();
   List<NoteModel> getUnownedNotes();
   Future<Either<Failure, void>> deleteNote(String noteId);
+  Future<void> clearAllData();
 }

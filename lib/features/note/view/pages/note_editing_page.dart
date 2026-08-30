@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_notes/features/authentication/provider/auth_provider.dart';
 import 'package:my_notes/features/note/provider/note_provider.dart';
 import 'dart:convert';
 

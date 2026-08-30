@@ -289,6 +289,11 @@ class NoteRepositoryImpl implements NoteRepository {
     }
   }
 
+  @override
+  Future<void> clearAllData() async {
+    await _noteLocalDataSource.clearAllData();
+  }
+
   Failure _mapFirestoreError(FirebaseException e) {
     final String message;
     final FailureType type;

@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_notes/app_theme/theme_provider.dart';
+import 'package:my_notes/core/session/session_controller.dart';
+import 'package:my_notes/features/authentication/provider/auth_provider.dart';
+import 'package:my_notes/features/authentication/view/screens/sign_in_page.dart';
 import 'package:my_notes/features/note/provider/note_provider.dart';
 import 'package:my_notes/features/note/view/pages/note_editing_page.dart';
 import 'package:my_notes/features/note/view/widgets/note_tile.dart';
@@ -69,13 +72,21 @@ class _NotePageState extends ConsumerState<NotePage> {
   Widget build(BuildContext context) {
     final notesAsync = ref.watch(noteListProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final user = ref.watch(authControllerProvider.notifier).getUser();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text(
-          'my notes',
-          style: TextStyle(fontFamily: 'junicode', fontStyle: FontStyle.italic),
-        ),
+        title: user == null
+            ? Text(
+                'my notes',
+                style: TextStyle(
+                  fontFamily: 'junicode',
+                  fontStyle: FontStyle.italic,
+                ),
+              )
+            : Text(user.username),
+
         actions: [
           if (_isSelecting)
             IconButton(
@@ -92,9 +103,19 @@ class _NotePageState extends ConsumerState<NotePage> {
             icon: Icon(switch (themeMode) {
               ThemeMode.dark => Icons.mode_night,
               ThemeMode.light => Icons.wb_sunny,
-              ThemeMode.system =>
-                Icons.brightness_auto, // or Icons.phone_android
+              ThemeMode.system => Icons.brightness_auto,
             }),
+          ),
+          PopupMenuButton(
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                child: Text('log out'),
+                onTap: () async {
+                  ref.read(sessionControllerProvider.notifier).logOut();
+                  if (!context.mounted) return;
+                },
+              ),
+            ],
           ),
         ],
       ),

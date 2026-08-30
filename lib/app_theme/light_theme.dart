@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:my_notes/app_theme/app_pallete.dart';
 
 class LightTheme {
   static final lightTheme = ThemeData.light().copyWith(

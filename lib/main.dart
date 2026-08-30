@@ -44,6 +44,10 @@ class MyApp extends ConsumerWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return CircularProgressIndicator();
           }
+          if (snapshot.hasData) {
+            return const NotePage();
+          }
+
           return SignInPage();
         },
       ),

@@ -3,19 +3,18 @@ import 'package:my_notes/core/error/failures.dart';
 import 'package:my_notes/features/authentication/data/model/user_model.dart';
 
 abstract class AuthRepository {
-  Future<Either<Failure, String>> createUserWithEmailAndPassword(
+  Future<Either<Failure, void>> createUserWithEmailAndPassword(
     String email,
     String password,
     String username,
   );
 
-  Future<Either<Failure, UserModel>> getUser(String uid);
+  UserModel? getUser();
 
-  Future<Either<Failure, String>> signInWithEmailAndPassword(
+  Future<Either<Failure, void>> signInWithEmailAndPassword(
     String email,
     String password,
   );
-  Future<void> saveUsername(String username);
 
-  Future<String> getUsername();
+  Future<void> logOut();
 }

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
-class NoteTile extends ConsumerStatefulWidget {
+class NoteTile extends StatefulWidget {
   final Document content;
   final DateTime? dateTime;
   final VoidCallback? onTap;
@@ -24,10 +23,10 @@ class NoteTile extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<NoteTile> createState() => _NoteTileState();
+  State<NoteTile> createState() => _NoteTileState();
 }
 
-class _NoteTileState extends ConsumerState<NoteTile> {
+class _NoteTileState extends State<NoteTile> {
   late final QuillController _controller;
   final GlobalKey _measureKey = GlobalKey();
   bool _isOverFlowing = false;
@@ -108,6 +107,7 @@ class _NoteTileState extends ConsumerState<NoteTile> {
               padding: const EdgeInsets.all(5.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (widget.dateTime != null)

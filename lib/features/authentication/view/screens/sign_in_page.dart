@@ -79,6 +79,14 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           'my notes',
           style: TextStyle(fontFamily: 'junicode', fontStyle: FontStyle.italic),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(
+              context,
+            ).pushReplacement(MaterialPageRoute(builder: (ctx) => NotePage())),
+            child: Text('skip'),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(

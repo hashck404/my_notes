@@ -96,6 +96,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
           style: TextStyle(fontFamily: 'junicode', fontStyle: FontStyle.italic),
         ),
         backgroundColor: Colors.transparent,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(
+              context,
+            ).pushReplacement(MaterialPageRoute(builder: (ctx) => NotePage())),
+            child: Text('skip'),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Stack(

@@ -54,4 +54,9 @@ class NoteController extends AsyncNotifier<void> {
       (success) => state = AsyncData(null),
     );
   }
+
+  Future<void> clearAllData() async {
+    final repo = ref.watch(noteRepositoryProvider);
+    repo.clearAllData();
+  }
 }

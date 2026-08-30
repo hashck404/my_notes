@@ -30,7 +30,7 @@ class AuthRemoteDatasource {
       //Creates a new user document in firestore
       try {
         await retry(
-          () => _createUserDocument(newUser.uid, email, username),
+          () => _createUserDocument(newUser, email, username),
           retryIf: (e) =>
               e is FirebaseException &&
               (e.code == 'unavailable' || e.code == 'deadline-exceeded'),
@@ -77,12 +77,27 @@ class AuthRemoteDatasource {
     return user.uid;
   }
 
-  Future<void> _createUserDocument(String uid, email, username) async {
-    await _firebaseFirestore.collection('users').doc(uid).set({
-      'uid': uid,
-      'email': email,
-      'username': username,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+  Future<void> _createUserDocument(
+    User user,
+    String email,
+    String username,
+  ) async {
+    final docRef = _firebaseFirestore.collection('users').doc(user.uid);
+
+    if (user.metadata.creationTime != null) {
+      await docRef.set({
+        'uid': user.uid,
+        'email': email,
+        'username': username,
+        'createdAt': Timestamp.fromDate(user.metadata.creationTime!),
+      });
+    } else {
+      await docRef.set({
+        'uid': user.uid,
+        'email': email,
+        'username': username,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    }
   }
 }

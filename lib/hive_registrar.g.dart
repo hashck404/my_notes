@@ -3,16 +3,19 @@
 // Check in to version control
 
 import 'package:hive_ce/hive.dart';
+import 'package:my_notes/features/authentication/data/model/user_model.dart';
 import 'package:my_notes/features/note/data/model/note_model.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
     registerAdapter(NoteModelAdapter());
+    registerAdapter(UserModelAdapter());
   }
 }
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
     registerAdapter(NoteModelAdapter());
+    registerAdapter(UserModelAdapter());
   }
 }

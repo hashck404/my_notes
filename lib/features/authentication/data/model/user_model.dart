@@ -1,9 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
+part 'user_model.g.dart';
 
+@HiveType(typeId: 0)
 class UserModel {
+  @HiveField(0)
   final String uid;
+  @HiveField(1)
   final String username;
+  @HiveField(2)
   final String email;
+  @HiveField(3)
   final DateTime createdAt;
 
   UserModel({
@@ -23,7 +30,7 @@ class UserModel {
   }
 
   factory UserModel.fromDocument(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return UserModel(
       uid: doc.id,
       username: data['username'] as String? ?? '',
@@ -37,7 +44,7 @@ class UserModel {
       'uid': uid,
       'username': username,
       'email': email,
-      'createdAt': createdAt,
+      'createdAt': Timestamp.fromDate(createdAt),
     };
   }
 }

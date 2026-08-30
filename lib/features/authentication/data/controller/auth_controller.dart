@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_notes/features/authentication/data/model/user_model.dart';
 import 'package:my_notes/features/authentication/provider/auth_provider.dart';
 
 class AuthController extends AsyncNotifier<void> {
@@ -15,12 +16,12 @@ class AuthController extends AsyncNotifier<void> {
       password,
       name,
     );
+
     result.fold(
       (failure) {
         state = AsyncError(failure, StackTrace.current);
       },
       (success) async {
-        await repo.saveUsername(name);
         state = AsyncData(null);
       },
     );
@@ -30,6 +31,7 @@ class AuthController extends AsyncNotifier<void> {
     state = AsyncLoading();
     final repo = ref.read(authRepositoryProvider);
     final result = await repo.signInWithEmailAndPassword(email, password);
+
     result.fold(
       (failure) {
         state = AsyncValue.error(failure, StackTrace.current);
@@ -38,5 +40,15 @@ class AuthController extends AsyncNotifier<void> {
         state = AsyncData(null);
       },
     );
+  }
+
+  UserModel? getUser() {
+    final repo = ref.watch(authRepositoryProvider);
+    return repo.getUser();
+  }
+
+  Future<void> logOut() async {
+    final repo = ref.watch(authRepositoryProvider);
+    await repo.logOut();
   }
 }

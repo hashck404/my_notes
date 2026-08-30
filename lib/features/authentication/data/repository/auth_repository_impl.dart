@@ -13,7 +13,7 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._remoteDatasource, this._localDataSource);
 
   @override
-  Future<Either<Failure, String>> createUserWithEmailAndPassword(
+  Future<Either<Failure, void>> createUserWithEmailAndPassword(
     String email,
     String password,
     String username,
@@ -24,7 +24,20 @@ class AuthRepositoryImpl implements AuthRepository {
         password,
         username,
       );
-      return Right(uid);
+
+      final userModel = await _remoteDatasource.getUser(uid);
+      if (userModel == null) {
+        await _localDataSource.signOut();
+        return Left(
+          Failure(
+            message: 'sign in failed: cannot get user',
+            type: FailureType.unknownFailure,
+          ),
+        );
+      }
+      await _localDataSource.saveUser(userModel);
+
+      return Right(null);
     } on FirebaseAuthException catch (e) {
       final String message;
       switch (e.code) {
@@ -61,6 +74,7 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(
         Failure(
           message: 'Something went wrong. Please try again.',
+
           type: FailureType.unknownFailure,
           details: e.toString(),
         ),
@@ -69,59 +83,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserModel>> getUser(String uid) async {
-    try {
-      final userModel = await _remoteDatasource.getUser(uid);
-
-      if (userModel == null) {
-        logger.e(
-          'User doc missing for uid: $uid — signup may have failed to write profile.',
-        );
-        return Left(
-          Failure(
-            message:
-                'We couldn\'t load your profile. Please try again or contact support.',
-            type: FailureType.serverFailure,
-            details: 'user-doc-not-found',
-          ),
-        );
-      }
-      return Right(userModel);
-    } on FirebaseException catch (e) {
-      final String message;
-      final FailureType type;
-
-      switch (e.code) {
-        case 'permission-denied':
-          message = 'You don\'t have permission to access this data.';
-          type = FailureType.serverFailure;
-          break;
-        case 'unavailable':
-        case 'deadline-exceeded':
-          message = 'Server unavailable. Please check your connection.';
-          type = FailureType.networkFailure;
-          break;
-        default:
-          logger.e('Unhandled Firestore error code: ${e.code}');
-          message = 'Something went wrong. Please try again.';
-          type = FailureType.serverFailure;
-      }
-
-      return Left(Failure(message: message, type: type, details: e.code));
-    } catch (e, s) {
-      logger.e(e.toString(), stackTrace: s);
-      return Left(
-        Failure(
-          message: 'Something went wrong. Please try again.',
-          type: FailureType.unknownFailure,
-          details: e.toString(),
-        ),
-      );
-    }
+  UserModel? getUser() {
+    return _localDataSource.getUser();
   }
 
   @override
-  Future<Either<Failure, String>> signInWithEmailAndPassword(
+  Future<Either<Failure, void>> signInWithEmailAndPassword(
     String email,
     String password,
   ) async {
@@ -130,7 +97,20 @@ class AuthRepositoryImpl implements AuthRepository {
         email,
         password,
       );
-      return Right(uid);
+
+      final userModel = await _remoteDatasource.getUser(uid);
+      if (userModel == null) {
+        await _localDataSource.signOut();
+        return Left(
+          Failure(
+            message: 'sign in failed: cannot get user',
+            type: FailureType.unknownFailure,
+          ),
+        );
+      }
+
+      await _localDataSource.saveUser(userModel);
+      return Right(null);
     } on FirebaseAuthException catch (e) {
       final String message;
       final FailureType type;
@@ -180,12 +160,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<String> getUsername() async {
-    return await _localDataSource.getUsername();
-  }
-
-  @override
-  Future<void> saveUsername(String username) async {
-    await _localDataSource.saveUsername(username);
+  Future<void> logOut() async {
+    await _localDataSource.signOut();
   }
 }

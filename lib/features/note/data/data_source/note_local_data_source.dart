@@ -38,4 +38,8 @@ class NoteLocalDataSource {
   Future<void> removeNote(String id) async {
     await _noteBox.delete(id);
   }
+
+  Future<void> clearAllData() async {
+    await _noteBox.clear();
+  }
 }

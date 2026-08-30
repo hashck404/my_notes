@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 part 'note_model.g.dart';
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 1)
 class NoteModel {
   @HiveField(0)
   final String? ownerId;
