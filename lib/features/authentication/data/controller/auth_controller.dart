@@ -21,7 +21,7 @@ class AuthController extends AsyncNotifier<void> {
       (failure) {
         state = AsyncError(failure, StackTrace.current);
       },
-      (success) async {
+      (success) {
         state = AsyncData(null);
       },
     );
@@ -48,7 +48,7 @@ class AuthController extends AsyncNotifier<void> {
   }
 
   Future<void> logOut() async {
-    final repo = ref.watch(authRepositoryProvider);
+    final repo = ref.read(authRepositoryProvider);
     await repo.logOut();
   }
 }

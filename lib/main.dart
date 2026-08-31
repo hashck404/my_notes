@@ -5,6 +5,7 @@ import 'package:my_notes/app_theme/dark_theme.dart';
 import 'package:my_notes/app_theme/light_theme.dart';
 import 'package:my_notes/app_theme/theme_provider.dart';
 import 'package:my_notes/core/dependency_initialization.dart';
+import 'package:my_notes/features/authentication/view/screens/auth_gate.dart';
 import 'package:my_notes/features/authentication/view/screens/sign_in_page.dart';
 import 'package:my_notes/features/authentication/view/screens/sign_up_page.dart';
 import 'package:my_notes/features/note/view/pages/note_editing_page.dart';
@@ -38,17 +39,18 @@ class MyApp extends ConsumerWidget {
       darkTheme: DarkTheme.darkTheme,
       themeMode: themeMode,
 
-      home: StreamBuilder(
-        stream: FirebaseAuth.instance.idTokenChanges(),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           }
-          if (snapshot.hasData) {
+          if (snapshot.data != null) {
+            print('showing the note page');
             return const NotePage();
           }
-
-          return SignInPage();
+          print('showing the sign in page');
+          return const AuthGate();
         },
       ),
     );

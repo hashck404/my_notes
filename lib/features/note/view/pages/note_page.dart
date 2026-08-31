@@ -111,7 +111,7 @@ class _NotePageState extends ConsumerState<NotePage> {
               PopupMenuItem(
                 child: Text('log out'),
                 onTap: () async {
-                  ref.read(sessionControllerProvider.notifier).logOut();
+                  await ref.read(sessionControllerProvider.notifier).logOut();
                   if (!context.mounted) return;
                 },
               ),
@@ -140,7 +140,8 @@ class _NotePageState extends ConsumerState<NotePage> {
                 key: ValueKey(notes[index].id),
                 isPinned: notes[index].isPinned,
                 content: _parseDocument(notes[index].content),
-                dateTime: DateTime.now(),
+                dateTime: notes[index].localUpdatedAt,
+                isSync: notes[index].isSync,
                 onTap: () async {
                   await Navigator.of(context).push(
                     MaterialPageRoute(

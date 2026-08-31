@@ -9,7 +9,8 @@ import 'package:my_notes/features/authentication/view/widgets/loading_animation.
 import 'package:my_notes/features/note/view/pages/note_page.dart';
 
 class SignInPage extends ConsumerStatefulWidget {
-  const SignInPage({super.key});
+  const SignInPage({super.key, required this.authModeToggle});
+  final VoidCallback authModeToggle;
 
   @override
   ConsumerState<SignInPage> createState() => _SignInPageState();
@@ -83,7 +84,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
           TextButton(
             onPressed: () => Navigator.of(
               context,
-            ).pushReplacement(MaterialPageRoute(builder: (ctx) => NotePage())),
+            ).push(MaterialPageRoute(builder: (ctx) => NotePage())),
             child: Text('skip'),
           ),
         ],
@@ -148,9 +149,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                         SizedBox(height: 10),
                         ElevatedButton(
                           onPressed: () {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (ctx) => SignUpPage()),
-                            );
+                            widget.authModeToggle();
                           },
 
                           style: ElevatedButton.styleFrom(

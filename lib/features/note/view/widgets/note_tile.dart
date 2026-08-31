@@ -10,6 +10,7 @@ class NoteTile extends StatefulWidget {
   final VoidCallback onSelectionToggle;
   final bool isSelecting;
   final bool isSelected;
+  final bool isSync;
 
   const NoteTile({
     super.key,
@@ -20,6 +21,7 @@ class NoteTile extends StatefulWidget {
     required this.onSelectionToggle,
     this.isSelecting = false,
     this.isSelected = false,
+    required this.isSync,
   });
 
   @override
@@ -112,9 +114,10 @@ class _NoteTileState extends State<NoteTile> {
                 children: [
                   if (widget.dateTime != null)
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 4.0),
+                          padding: const EdgeInsets.only(bottom: 4.0, right: 4),
                           child: Text(
                             DateFormat.yMMMd().format(widget.dateTime!),
                             style: TextStyle(
@@ -123,7 +126,17 @@ class _NoteTileState extends State<NoteTile> {
                             ),
                           ),
                         ),
-                        if (widget.isPinned) Icon(Icons.push_pin, size: 15),
+                        if (widget.isPinned)
+                          Icon(Icons.push_pin, size: 15, color: Colors.grey),
+                        if (widget.isSync)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Icon(
+                              Icons.cached,
+                              size: 15,
+                              color: Colors.grey,
+                            ),
+                          ),
                       ],
                     ),
 
